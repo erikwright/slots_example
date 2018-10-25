@@ -7,7 +7,7 @@ import random
 class SlotMachine:
 
     class Symbol(enum.Enum):
-        HORSESHOES = 'Horshoes'
+        HORSESHOES = 'Horseshoes'
         DIAMONDS = 'Diamonds'
         SPADES = 'Spades'
         HEARTS = 'Hearts'
@@ -71,7 +71,7 @@ class SlotMachine:
     def _spin(self):
         return random.choices(
             list(self.Symbol),
-            [self.__weights[symbol] for symbol in list(self.Symbol)],
+            [self.__weights[symbol.value] for symbol in list(self.Symbol)],
             k=len(self.__reels)
         )
 
@@ -84,9 +84,9 @@ class SlotMachine:
     }
 
     __DEFAULT_WEIGHTS = {
-        Symbol.HORSESHOES: 10,
-        Symbol.DIAMONDS: 5,
-        Symbol.SPADES: 5,
-        Symbol.HEARTS: 3,
-        Symbol.BELL: 1
+        Symbol.HORSESHOES.value: 10,
+        Symbol.DIAMONDS.value: 5,
+        Symbol.SPADES.value: 5,
+        Symbol.HEARTS.value: 3,
+        Symbol.BELL.value: 1
     }
