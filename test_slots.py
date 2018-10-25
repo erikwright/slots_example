@@ -48,29 +48,45 @@ def test_pay_table(monkeypatch):
 
 
 def test_raise_play_without_money():
-    sm = slots.SlotMachine()
-    sm.adjust_reserves(1000)
+    def play(with_money):
+        sm = slots.SlotMachine()
+        sm.adjust_reserves(1000)
+        if with_money:
+            sm.insert_money(25)
+        sm.play()
+
+    play(with_money=True)
     with pytest.raises(Exception):
-        play()
+        play(with_money=False)
 
 
 def test_raise_excessive_withdrawal():
-    sm = slots.SlotMachine()
-    sm.adjust_reserves(1000)
+    def withdraw(amount):
+        sm = slots.SlotMachine()
+        sm.adjust_reserves(1000)
+        sm.adjust_reserves(-amount)
+
+    withdraw(500)
+    withdraw(1000)
     with pytest.raises(Exception):
-        adjust_reserves(-10000)
+        withdraw(1001)
 
 
 def test_raise_below_minimum_play():
+    def insert_money(amount):
+        sm = slots.SlotMachine()
+        sm.insert_money(amount)
+
+    insert_money(25)
     with pytest.raises(Exception):
-        sm.insert_money(10)
+        insert_money(10)
 
 
 def test_raise_double_insert():
     sm = slots.SlotMachine()
     sm.adjust_reserves(1000)
+    sm.insert_money(25)
     with pytest.raises(Exception):
-        sm.insert_money(25)
         sm.insert_money(25)
 
 
