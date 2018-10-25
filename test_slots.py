@@ -74,3 +74,13 @@ def test_slot_machine(monkeypatch, tmpdir):
                   actual=counter[slots.SlotMachine.Symbol.SPADES])
     assert_approx(expected=counter[slots.SlotMachine.Symbol.BELL] * 3,
                   actual=counter[slots.SlotMachine.Symbol.HEARTS])
+
+    config_file = tmpdir.join('.slots.cfg')
+    monkeypatch.setenv('SLOTS_CFG_PATH', str(config_file))
+    sm = slots.SlotMachine()
+    with pytest.raises(Exception):
+        sm.insert_money(15)
+
+    config_file.write('{"minimum_play": 15}')
+    sm = slots.SlotMachine()
+    sm.insert_money(15)
