@@ -10,22 +10,24 @@ def test_slot_machine(monkeypatch):
     sm = slots.SlotMachine()
     sm.adjust_reserves(1000)
     sm.insert_money(25)
-    initial_reels = sm.reels()
-    winnings = sm.play()
-    assert sm.reels() != initial_reels
-    sm.insert_money(25)
     returned = sm.return_money()
     assert returned == 25
 
     random_choice = mock.Mock()
+    monkeypatch.setattr(random, 'choice', random_choice)
+
     random_choice.side_effect = [
         slots.SlotMachine.Symbol.BELL,
         slots.SlotMachine.Symbol.BELL,
         slots.SlotMachine.Symbol.BELL
     ]
-    monkeypatch.setattr(random, 'choice', random_choice)
     sm.insert_money(25)
     assert sm.play() == 25 * 16
+    assert sm.reels() == [
+        slots.SlotMachine.Symbol.BELL,
+        slots.SlotMachine.Symbol.BELL,
+        slots.SlotMachine.Symbol.BELL
+    ]
 
     random_choice.side_effect = [
         slots.SlotMachine.Symbol.BELL,
@@ -35,6 +37,11 @@ def test_slot_machine(monkeypatch):
     monkeypatch.setattr(random, 'choice', random_choice)
     sm.insert_money(25)
     assert sm.play() == 25
+    assert sm.reels() == [
+        slots.SlotMachine.Symbol.BELL,
+        slots.SlotMachine.Symbol.BELL,
+        slots.SlotMachine.Symbol.HEARTS
+    ]
 
     with pytest.raises(Exception):
         play()
