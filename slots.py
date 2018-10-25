@@ -51,11 +51,7 @@ class SlotMachine:
         if self.__deposited * max(self.__pay_table.values()) > self.__prize_reserves:
             raise Exception('Insufficient reserves for maximum possible payout.')
 
-        self.__reels = random.choices(
-            list(self.Symbol),
-            [self.__weights[symbol] for symbol in list(self.Symbol)],
-            k=len(self.__reels)
-        )
+        self.__reels = self._spin()
 
         pay_table_key = ' '.join(reel.value for reel in self.__reels)
         if pay_table_key not in self.__pay_table:
@@ -71,6 +67,13 @@ class SlotMachine:
         self.__deposited = 0
 
         return winnings
+
+    def _spin(self):
+        return random.choices(
+            list(self.Symbol),
+            [self.__weights[symbol] for symbol in list(self.Symbol)],
+            k=len(self.__reels)
+        )
 
     __DEFAULT_PAY_TABLE = {
         '* *': 1,

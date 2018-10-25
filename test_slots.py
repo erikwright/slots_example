@@ -1,26 +1,25 @@
-import random
-
+import collections
 from unittest import mock
 
 import pytest
 
 import slots
 
-def test_slot_machine(monkeypatch):
+def test_slot_machine(monkeypatch, tmpdir):
     sm = slots.SlotMachine()
     sm.adjust_reserves(1000)
     sm.insert_money(25)
     returned = sm.return_money()
     assert returned == 25
 
-    random_choice = mock.Mock()
-    monkeypatch.setattr(random, 'choice', random_choice)
+    spin = mock.Mock()
+    monkeypatch.setattr(sm, '_spin', spin)
 
-    random_choice.side_effect = [
+    spin.side_effect = [[
         slots.SlotMachine.Symbol.BELL,
         slots.SlotMachine.Symbol.BELL,
         slots.SlotMachine.Symbol.BELL
-    ]
+    ]]
     sm.insert_money(25)
     assert sm.play() == 25 * 16
     assert sm.reels() == [
@@ -29,12 +28,11 @@ def test_slot_machine(monkeypatch):
         slots.SlotMachine.Symbol.BELL
     ]
 
-    random_choice.side_effect = [
+    spin.side_effect = [[
         slots.SlotMachine.Symbol.BELL,
         slots.SlotMachine.Symbol.BELL,
         slots.SlotMachine.Symbol.HEARTS
-    ]
-    monkeypatch.setattr(random, 'choice', random_choice)
+    ]]
     sm.insert_money(25)
     assert sm.play() == 25
     assert sm.reels() == [
@@ -55,3 +53,24 @@ def test_slot_machine(monkeypatch):
     with pytest.raises(Exception):
         sm.insert_money(25)
         sm.insert_money(25)
+
+    counter = collections.Counter()
+    for i in range(100000):
+        sm = slots.SlotMachine()
+        sm.adjust_reserves(1000)
+        sm.insert_money(25)
+        sm.play()
+        counter.update(sm.reels())
+
+    def assert_approx(expected, actual):
+        assert abs(actual - expected) < expected * 0.05
+
+    assert sum(counter[symbol] for symbol in list(slots.SlotMachine.Symbol)) == 300000
+    assert_approx(expected=counter[slots.SlotMachine.Symbol.BELL] * 10,
+                  actual=counter[slots.SlotMachine.Symbol.HORSESHOES])
+    assert_approx(expected=counter[slots.SlotMachine.Symbol.BELL] * 5,
+                  actual=counter[slots.SlotMachine.Symbol.DIAMONDS])
+    assert_approx(expected=counter[slots.SlotMachine.Symbol.BELL] * 5,
+                  actual=counter[slots.SlotMachine.Symbol.SPADES])
+    assert_approx(expected=counter[slots.SlotMachine.Symbol.BELL] * 3,
+                  actual=counter[slots.SlotMachine.Symbol.HEARTS])
