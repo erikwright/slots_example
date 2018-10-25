@@ -20,6 +20,7 @@ class SlotMachine:
         self.__prize_reserves = 0
         self.__reels = [self.Symbol.BELL for _ in range(self.__config.get('reels', 3))]
         self.__pay_table = self.__config.get('pay_table', self.__DEFAULT_PAY_TABLE)
+        self.__weights = self.__config.get('weights', self.__DEFAULT_WEIGHTS)
 
     def insert_money(self, amount):
         if self.__deposited:
@@ -50,8 +51,12 @@ class SlotMachine:
         if self.__deposited * max(self.__pay_table.values()) > self.__prize_reserves:
             raise Exception('Insufficient reserves for maximum possible payout.')
 
-        for i in range(len(self.__reels)):
-            self.__reels[i] = random.choice(list(self.Symbol))
+        self.__reels = random.choices(
+            list(self.Symbol),
+            [self.__weights[symbol] for symbol in list(self.Symbol)],
+            k=len(self.__reels)
+        )
+
         pay_table_key = ' '.join(reel.value for reel in self.__reels)
         if pay_table_key not in self.__pay_table:
             counter = collections.Counter(self.__reels)
@@ -73,4 +78,12 @@ class SlotMachine:
         'Diamonds Spades Hearts': 4,
         'Hearts Hearts Hearts': 8,
         'Bell Bell Bell': 16
+    }
+
+    __DEFAULT_WEIGHTS = {
+        Symbol.HORSESHOES: 10,
+        Symbol.DIAMONDS: 5,
+        Symbol.SPADES: 5,
+        Symbol.HEARTS: 3,
+        Symbol.BELL: 1
     }
