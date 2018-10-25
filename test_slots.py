@@ -1,8 +1,12 @@
+import random
+
+from unittest import mock
+
 import pytest
 
 import slots
 
-def test_slot_machine():
+def test_slot_machine(monkeypatch):
     sm = slots.SlotMachine()
     sm.adjust_reserves(1000)
     sm.insert_money(25)
@@ -16,3 +20,13 @@ def test_slot_machine():
         sm.insert_money(25)
         winnings += sm.play()
     assert winnings + sm.reserves() == 1000 + 25 * 11
+
+    random_choice = mock.Mock()
+    random_choice.side_effect = [
+        slots.SlotMachine.Symbol.BELL,
+        slots.SlotMachine.Symbol.BELL,
+        slots.SlotMachine.Symbol.BELL
+    ]
+    monkeypatch.setattr(random, 'choice', random_choice)
+    sm.insert_money(25)
+    assert sm.play() == 25 * 16
