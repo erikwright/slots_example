@@ -16,10 +16,6 @@ def test_slot_machine(monkeypatch):
     sm.insert_money(25)
     returned = sm.return_money()
     assert returned == 25
-    for i in range(10):
-        sm.insert_money(25)
-        winnings += sm.play()
-    assert winnings + sm.reserves() == 1000 + 25 * 11
 
     random_choice = mock.Mock()
     random_choice.side_effect = [
